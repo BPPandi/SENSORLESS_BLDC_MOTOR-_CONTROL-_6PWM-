@@ -6,7 +6,7 @@
   ******************************************************************************
   * @attention
   *
-  * Copyright (c) 2022 STMicroelectronics.
+  * Copyright (c) 2023 STMicroelectronics.
   * All rights reserved.
   *
   * This software is licensed under terms that can be found in the LICENSE file
@@ -21,11 +21,6 @@
 
 /* Private includes ----------------------------------------------------------*/
 /* USER CODE BEGIN Includes */
-uint16_t reg;
-uint16_t resp = 0x0000;
-uint8_t count =0;
-uint16_t strValueA[20];
-TIM_OC_InitTypeDef sConfigOC = {0};
 
 /* USER CODE END Includes */
 
@@ -44,8 +39,6 @@ TIM_OC_InitTypeDef sConfigOC = {0};
 /* USER CODE END PM */
 
 /* Private variables ---------------------------------------------------------*/
-SPI_HandleTypeDef hspi3;
-
 TIM_HandleTypeDef htim1;
 
 /* USER CODE BEGIN PV */
@@ -55,7 +48,6 @@ TIM_HandleTypeDef htim1;
 /* Private function prototypes -----------------------------------------------*/
 void SystemClock_Config(void);
 static void MX_GPIO_Init(void);
-static void MX_SPI3_Init(void);
 static void MX_TIM1_Init(void);
 /* USER CODE BEGIN PFP */
 
@@ -63,164 +55,7 @@ static void MX_TIM1_Init(void);
 
 /* Private user code ---------------------------------------------------------*/
 /* USER CODE BEGIN 0 */
-void drv8353r_read (uint8_t address)
-{
-  resp = 0x8000 | (((uint16_t)address<<11)&0x7800);
-  //sprintf(strValueA,"Reg[%d]= %u\r\n",count);
- // CDC_Transmit_FS(strValueA,strlen(strValueA));
-  HAL_GPIO_WritePin(CS_GPIO_Port, CS_Pin, GPIO_PIN_RESET);
-  HAL_SPI_Receive(&hspi3, (uint8_t*)&resp, 1, 100);
-  //sprintf(strValueA,"%hu\r\n",resp);
-  //CDC_Transmit_FS(strValueA,strlen(strValueA));
-  HAL_GPIO_WritePin(CS_GPIO_Port, CS_Pin, GPIO_PIN_SET);
-  if (count == 2)
-  {
-	  count=0;
-  }
-  count = count+1;
-}
 
-void drv8353r_write (uint8_t address, uint16_t value)
-{
-  reg = 0x0000 | (((uint16_t)address<<11)&0x7800) | (value & 0x7ff);
-  HAL_GPIO_WritePin(CS_GPIO_Port, CS_Pin, GPIO_PIN_RESET);
-  HAL_SPI_Transmit(&hspi3, (uint8_t*)&reg, 1, 100);
-  HAL_GPIO_WritePin(CS_GPIO_Port, CS_Pin, GPIO_PIN_SET);
-}
-void drvFault()
-{
-//	uint8_t a = HAL_GPIO_ReadPin(GPIOB,Fault_Pin);
-	/*HAL_TIM_PWM_Start(&htim1, TIM_CHANNEL_1);
-	HAL_TIMEx_PWMN_Start(&htim1, TIM_CHANNEL_1);
-	HAL_TIM_PWM_Start(&htim1, TIM_CHANNEL_2);
-	HAL_TIMEx_PWMN_Start(&htim1, TIM_CHANNEL_2);
-	HAL_TIM_PWM_Start(&htim1, TIM_CHANNEL_3);
-	HAL_TIMEx_PWMN_Start(&htim1, TIM_CHANNEL_3);*/
-//	if(a==0)
-	/*HAL_TIM_PWM_Start(&htim1, TIM_CHANNEL_1);
-	HAL_TIMEx_PWMN_Start(&htim1, TIM_CHANNEL_1);
-	HAL_TIM_PWM_Stop(&htim1, TIM_CHANNEL_2);
-	HAL_TIMEx_PWMN_Stop(&htim1, TIM_CHANNEL_2);
-	HAL_TIM_PWM_Stop(&htim1, TIM_CHANNEL_3);
-	HAL_TIMEx_PWMN_Stop(&htim1, TIM_CHANNEL_3);
-	HAL_Delay(10);*/
-//	sConfigOC.Pulse = 0;
-	//HAL_TIM_PWM_Start(&htim1, TIM_CHANNEL_1);
-	//HAL_TIMEx_PWMN_Start(&htim1, TIM_CHANNEL_1);
-
-
-
-	HAL_TIM_PWM_Start(&htim1, TIM_CHANNEL_2);
-	HAL_TIMEx_PWMN_Start(&htim1, TIM_CHANNEL_2);
-	HAL_TIM_PWM_Start(&htim1, TIM_CHANNEL_3);
-	HAL_TIMEx_PWMN_Start(&htim1, TIM_CHANNEL_3);
-
-	//HAL_TIM_PWM_Stop(&htim1, TIM_CHANNEL_1);
-	//HAL_TIMEx_PWMN_Stop(&htim1, TIM_CHANNEL_1);
-	HAL_TIM_PWM_Start(&htim1, TIM_CHANNEL_2);
-	HAL_TIMEx_PWMN_Start(&htim1, TIM_CHANNEL_2);
-	HAL_TIM_PWM_Start(&htim1, TIM_CHANNEL_3);
-	HAL_TIMEx_PWMN_Start(&htim1, TIM_CHANNEL_3);
-	HAL_Delay(10);
-#if 0
-	{
-		HAL_GPIO_WritePin(GPIOB, RED_Pin, GPIO_PIN_SET);
-		HAL_Delay(100);
-		HAL_GPIO_WritePin(GPIOB, RED_Pin, GPIO_PIN_RESET);
-		HAL_Delay(100);
-
-		HAL_TIM_PWM_Stop(&htim1, TIM_CHANNEL_1);
-		HAL_TIMEx_PWMN_Stop(&htim1, TIM_CHANNEL_1);
-		HAL_TIM_PWM_Stop(&htim1, TIM_CHANNEL_2);
-		HAL_TIMEx_PWMN_Stop(&htim1, TIM_CHANNEL_2);
-		HAL_TIM_PWM_Stop(&htim1, TIM_CHANNEL_3);
-		HAL_TIMEx_PWMN_Stop(&htim1, TIM_CHANNEL_3);
-
-
-	}
-//	if(a==1)
-	{
-		HAL_GPIO_WritePin(GPIOB, GREEN_Pin, GPIO_PIN_SET);
-
-//		HAL_TIM_PWM_Start(&htim1, TIM_CHANNEL_1);
-//		HAL_TIMEx_PWMN_Start(&htim1, TIM_CHANNEL_1);
-
-		//HAL_TIM_PWM_Start(&htim1, TIM_CHANNEL_2);
-		HAL_TIMEx_PWMN_Start(&htim1, TIM_CHANNEL_2);
-
-		HAL_TIM_PWM_Start(&htim1, TIM_CHANNEL_3);
-		HAL_TIMEx_PWMN_Start(&htim1, TIM_CHANNEL_3);
-
-		//******************************************************************************************************************
-		// STEP-1
-	    //*******************************************************************************************************************
-			  	  HAL_TIM_PWM_Start(&htim1, TIM_CHANNEL_1);
-			  	  HAL_TIMEx_PWMN_Stop(&htim1, TIM_CHANNEL_1);
-			  	  HAL_TIM_PWM_Stop(&htim1, TIM_CHANNEL_2);
-			  	  HAL_TIMEx_PWMN_Stop(&htim1, TIM_CHANNEL_2);
-			  	  HAL_TIM_PWM_Stop(&htim1, TIM_CHANNEL_3);
-			  	  HAL_TIMEx_PWMN_Start(&htim1, TIM_CHANNEL_3);
-			  	  HAL_Delay(10);
-
-			  	  //******************************************************************************************************************
-			  	  // STEP-2
-			  	  //*******************************************************************************************************************
-			  	  HAL_TIM_PWM_Stop(&htim1, TIM_CHANNEL_1);
-			  	  HAL_TIMEx_PWMN_Stop(&htim1, TIM_CHANNEL_1);
-			  	  HAL_TIM_PWM_Start(&htim1, TIM_CHANNEL_2);
-			  	  HAL_TIMEx_PWMN_Stop(&htim1, TIM_CHANNEL_2);
-			  	  HAL_TIM_PWM_Stop(&htim1, TIM_CHANNEL_3);
-			  	  HAL_TIMEx_PWMN_Start(&htim1, TIM_CHANNEL_3);
-			  	  HAL_Delay(10);
-
-
-			  	   //******************************************************************************************************************
-			  	  // STEP-3
-			  	  //*******************************************************************************************************************
-			  	  HAL_TIM_PWM_Stop(&htim1, TIM_CHANNEL_1);
-			  	  HAL_TIMEx_PWMN_Start(&htim1, TIM_CHANNEL_1);
-			  	  HAL_TIM_PWM_Start(&htim1, TIM_CHANNEL_2);
-			  	  HAL_TIMEx_PWMN_Stop(&htim1, TIM_CHANNEL_2);
-			  	  HAL_TIM_PWM_Stop(&htim1, TIM_CHANNEL_3);
-			  	//HAL_GPIO_WritePin(GPIOA, GPIO_PIN_10, GPIO_PIN_SET);
-			  	  HAL_TIMEx_PWMN_Stop(&htim1, TIM_CHANNEL_3);
-			  	  HAL_Delay(10);
-
-			  	  //******************************************************************************************************************
-			  	  // STEP-4
-			  	  //*******************************************************************************************************************
-			  	  HAL_TIM_PWM_Stop(&htim1, TIM_CHANNEL_1);
-			  	  HAL_TIMEx_PWMN_Start(&htim1, TIM_CHANNEL_1);
-			  	  HAL_TIM_PWM_Stop(&htim1, TIM_CHANNEL_2);
-			  	  HAL_TIMEx_PWMN_Stop(&htim1, TIM_CHANNEL_2);
-			  	  HAL_TIM_PWM_Start(&htim1, TIM_CHANNEL_3);
-			  	  HAL_TIMEx_PWMN_Stop(&htim1, TIM_CHANNEL_3);
-			  	  HAL_Delay(10);
-
-			  	  //******************************************************************************************************************
-			  	  // STEP-5
-			  	  //*******************************************************************************************************************
-			  	  HAL_TIM_PWM_Stop(&htim1, TIM_CHANNEL_1);
-			  	  HAL_TIMEx_PWMN_Stop(&htim1, TIM_CHANNEL_1);
-			  	  HAL_TIM_PWM_Stop(&htim1, TIM_CHANNEL_2);
-			  	  HAL_TIMEx_PWMN_Start(&htim1, TIM_CHANNEL_2);
-			  	  HAL_TIM_PWM_Start(&htim1, TIM_CHANNEL_3);
-			  	  HAL_TIMEx_PWMN_Stop(&htim1, TIM_CHANNEL_3);
-			  	  HAL_Delay(10);
-
-			  	  //******************************************************************************************************************
-			  	  // STEP-6
-			  	  //*******************************************************************************************************************
-			  	  HAL_TIM_PWM_Start(&htim1, TIM_CHANNEL_1);
-			  	  HAL_TIMEx_PWMN_Stop(&htim1, TIM_CHANNEL_1);
-			  	  HAL_TIM_PWM_Stop(&htim1, TIM_CHANNEL_2);
-			  	  HAL_TIMEx_PWMN_Start(&htim1, TIM_CHANNEL_2);
-			  	  HAL_TIM_PWM_Stop(&htim1, TIM_CHANNEL_3);
-			  	  HAL_TIMEx_PWMN_Stop(&htim1, TIM_CHANNEL_3);
-			  	  HAL_Delay(10);
-
-#endif
-}
 /* USER CODE END 0 */
 
 /**
@@ -251,11 +86,8 @@ int main(void)
 
   /* Initialize all configured peripherals */
   MX_GPIO_Init();
-  MX_SPI3_Init();
   MX_TIM1_Init();
   /* USER CODE BEGIN 2 */
-  //drv8353r_write(3,0x0000);
-  HAL_Delay(100);
   /* USER CODE END 2 */
 
   /* Infinite loop */
@@ -263,9 +95,41 @@ int main(void)
   while (1)
   {
     /* USER CODE END WHILE */
-	  drvFault();
-	  drv8353r_read(0);
-	  drv8353r_read(1);
+
+
+	  TIM1->CCR1 = 1000;
+	  HAL_TIM_PWM_Start(&htim1, TIM_CHANNEL_1);
+	  HAL_TIMEx_PWMN_Start(&htim1, TIM_CHANNEL_1);
+	  TIM1->CCR2 = 0;
+	  HAL_TIM_PWM_Start(&htim1, TIM_CHANNEL_2);
+	  HAL_TIMEx_PWMN_Start(&htim1, TIM_CHANNEL_2);
+	  TIM1->CCR3 = 0;
+	  HAL_TIM_PWM_Start(&htim1, TIM_CHANNEL_3);
+	  HAL_TIMEx_PWMN_Start(&htim1, TIM_CHANNEL_3);
+	  HAL_Delay(7);
+
+	  TIM1->CCR1 = 0;
+	  HAL_TIM_PWM_Start(&htim1, TIM_CHANNEL_1);
+	  HAL_TIMEx_PWMN_Start(&htim1, TIM_CHANNEL_1);
+	  TIM1->CCR2 = 1000;
+	  HAL_TIM_PWM_Start(&htim1, TIM_CHANNEL_2);
+	  HAL_TIMEx_PWMN_Start(&htim1, TIM_CHANNEL_2);
+	  TIM1->CCR3 = 0;
+	  HAL_TIM_PWM_Start(&htim1, TIM_CHANNEL_3);
+	  HAL_TIMEx_PWMN_Start(&htim1, TIM_CHANNEL_3);
+	  HAL_Delay(7);
+
+	  TIM1->CCR1 = 0;
+	  HAL_TIM_PWM_Start(&htim1, TIM_CHANNEL_1);
+	  HAL_TIMEx_PWMN_Start(&htim1, TIM_CHANNEL_1);
+	  TIM1->CCR2 = 0;
+	  HAL_TIM_PWM_Start(&htim1, TIM_CHANNEL_2);
+	  HAL_TIMEx_PWMN_Start(&htim1, TIM_CHANNEL_2);
+	  TIM1->CCR3 = 1000;
+	  HAL_TIM_PWM_Start(&htim1, TIM_CHANNEL_3);
+	  HAL_TIMEx_PWMN_Start(&htim1, TIM_CHANNEL_3);
+	  HAL_Delay(7);
+
 
     /* USER CODE BEGIN 3 */
   }
@@ -314,44 +178,6 @@ void SystemClock_Config(void)
 }
 
 /**
-  * @brief SPI3 Initialization Function
-  * @param None
-  * @retval None
-  */
-static void MX_SPI3_Init(void)
-{
-
-  /* USER CODE BEGIN SPI3_Init 0 */
-
-  /* USER CODE END SPI3_Init 0 */
-
-  /* USER CODE BEGIN SPI3_Init 1 */
-
-  /* USER CODE END SPI3_Init 1 */
-  /* SPI3 parameter configuration*/
-  hspi3.Instance = SPI3;
-  hspi3.Init.Mode = SPI_MODE_MASTER;
-  hspi3.Init.Direction = SPI_DIRECTION_2LINES;
-  hspi3.Init.DataSize = SPI_DATASIZE_16BIT;
-  hspi3.Init.CLKPolarity = SPI_POLARITY_LOW;
-  hspi3.Init.CLKPhase = SPI_PHASE_2EDGE;
-  hspi3.Init.NSS = SPI_NSS_SOFT;
-  hspi3.Init.BaudRatePrescaler = SPI_BAUDRATEPRESCALER_16;
-  hspi3.Init.FirstBit = SPI_FIRSTBIT_MSB;
-  hspi3.Init.TIMode = SPI_TIMODE_DISABLE;
-  hspi3.Init.CRCCalculation = SPI_CRCCALCULATION_DISABLE;
-  hspi3.Init.CRCPolynomial = 10;
-  if (HAL_SPI_Init(&hspi3) != HAL_OK)
-  {
-    Error_Handler();
-  }
-  /* USER CODE BEGIN SPI3_Init 2 */
-
-  /* USER CODE END SPI3_Init 2 */
-
-}
-
-/**
   * @brief TIM1 Initialization Function
   * @param None
   * @retval None
@@ -365,16 +191,16 @@ static void MX_TIM1_Init(void)
 
   TIM_ClockConfigTypeDef sClockSourceConfig = {0};
   TIM_MasterConfigTypeDef sMasterConfig = {0};
-  //TIM_OC_InitTypeDef sConfigOC = {0};
+  TIM_OC_InitTypeDef sConfigOC = {0};
   TIM_BreakDeadTimeConfigTypeDef sBreakDeadTimeConfig = {0};
 
   /* USER CODE BEGIN TIM1_Init 1 */
 
   /* USER CODE END TIM1_Init 1 */
   htim1.Instance = TIM1;
-  htim1.Init.Prescaler = 8-1;
+  htim1.Init.Prescaler = 7;
   htim1.Init.CounterMode = TIM_COUNTERMODE_UP;
-  htim1.Init.Period = 2000-1;
+  htim1.Init.Period = 1999;
   htim1.Init.ClockDivision = TIM_CLOCKDIVISION_DIV1;
   htim1.Init.RepetitionCounter = 0;
   htim1.Init.AutoReloadPreload = TIM_AUTORELOAD_PRELOAD_ENABLE;
@@ -404,17 +230,14 @@ static void MX_TIM1_Init(void)
   sConfigOC.OCFastMode = TIM_OCFAST_DISABLE;
   sConfigOC.OCIdleState = TIM_OCIDLESTATE_RESET;
   sConfigOC.OCNIdleState = TIM_OCNIDLESTATE_SET;
-  sConfigOC.Pulse = 0;
   if (HAL_TIM_PWM_ConfigChannel(&htim1, &sConfigOC, TIM_CHANNEL_1) != HAL_OK)
   {
     Error_Handler();
   }
-  sConfigOC.Pulse = 0;
   if (HAL_TIM_PWM_ConfigChannel(&htim1, &sConfigOC, TIM_CHANNEL_2) != HAL_OK)
   {
     Error_Handler();
   }
-  sConfigOC.Pulse = 0;
   if (HAL_TIM_PWM_ConfigChannel(&htim1, &sConfigOC, TIM_CHANNEL_3) != HAL_OK)
   {
     Error_Handler();
@@ -449,37 +272,17 @@ static void MX_GPIO_Init(void)
   /* GPIO Ports Clock Enable */
   __HAL_RCC_GPIOH_CLK_ENABLE();
   __HAL_RCC_GPIOB_CLK_ENABLE();
-  __HAL_RCC_GPIOC_CLK_ENABLE();
   __HAL_RCC_GPIOA_CLK_ENABLE();
-
-  /*Configure GPIO pin Output Level */
-  HAL_GPIO_WritePin(GPIOB, GREEN_Pin|RED_Pin, GPIO_PIN_RESET);
-
-  /*Configure GPIO pin Output Level */
-  HAL_GPIO_WritePin(CS_GPIO_Port, CS_Pin, GPIO_PIN_SET);
 
   /*Configure GPIO pin Output Level */
   HAL_GPIO_WritePin(EN_GPIO_Port, EN_Pin, GPIO_PIN_SET);
 
-  /*Configure GPIO pins : GREEN_Pin RED_Pin EN_Pin */
-  GPIO_InitStruct.Pin = GREEN_Pin|RED_Pin|EN_Pin;
+  /*Configure GPIO pin : EN_Pin */
+  GPIO_InitStruct.Pin = EN_Pin;
   GPIO_InitStruct.Mode = GPIO_MODE_OUTPUT_PP;
   GPIO_InitStruct.Pull = GPIO_NOPULL;
   GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_LOW;
-  HAL_GPIO_Init(GPIOB, &GPIO_InitStruct);
-
-  /*Configure GPIO pin : CS_Pin */
-  GPIO_InitStruct.Pin = CS_Pin;
-  GPIO_InitStruct.Mode = GPIO_MODE_OUTPUT_PP;
-  GPIO_InitStruct.Pull = GPIO_NOPULL;
-  GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_LOW;
-  HAL_GPIO_Init(CS_GPIO_Port, &GPIO_InitStruct);
-
-  /*Configure GPIO pin : Fault_Pin */
-  GPIO_InitStruct.Pin = Fault_Pin;
-  GPIO_InitStruct.Mode = GPIO_MODE_INPUT;
-  GPIO_InitStruct.Pull = GPIO_PULLUP;
-  HAL_GPIO_Init(Fault_GPIO_Port, &GPIO_InitStruct);
+  HAL_GPIO_Init(EN_GPIO_Port, &GPIO_InitStruct);
 
 }
 
